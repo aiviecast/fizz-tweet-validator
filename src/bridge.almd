@@ -5,19 +5,19 @@ import bytes
 import float
 import int
 
-var g_text: Bytes = bytes.new(0)
+var g_text: Bytes = bytes.zeros(0)
 
 @export(wasm, "tw_alloc")
 fn tw_alloc(len: Float) -> RawPtr = {
-  g_text = bytes.new(float.to_int(len))
+  g_text = bytes.zeros(int.from_saturating(len))
   bytes.as_mut_ptr(g_text)
 }
 
 @export(wasm, "tw_weighted_length")
-fn tw_weighted_length() -> Float = int.to_float(tw.weighted_length(bytes.to_string_lossy(g_text)))
+fn tw_weighted_length() -> Float = float.from(tw.weighted_length(bytes.to_string_lossy(g_text)))
 
 @export(wasm, "tw_remaining")
-fn tw_remaining() -> Float = int.to_float(tw.remaining(bytes.to_string_lossy(g_text)))
+fn tw_remaining() -> Float = float.from(tw.remaining(bytes.to_string_lossy(g_text)))
 
 @export(wasm, "tw_is_valid")
 fn tw_is_valid() -> Float = if tw.is_valid(bytes.to_string_lossy(g_text)) then 1.0 else 0.0
