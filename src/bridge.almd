@@ -1,32 +1,32 @@
 // wasm — ブラウザ/Node の X UI から呼ぶ。text を線形メモリに書き (tw_alloc)、
-// tw_weighted_length() 等が Int を返す。文字列を跨がない設計。
+// tw_weighted_length()! 等が Int を返す。文字列を跨がない設計。
 import self as tw
 import bytes
 import ffi
 import float
 import int
 
-var g_text: Bytes = bytes.zeros(0)
+var g_text: Region = ffi.region(bytes.new())
 
-@export(wasm, "tw_alloc")
-fn tw_alloc(len: Float) -> RawPtr = {
-  g_text = bytes.zeros(int.from_saturating(len))
-  ffi.address(g_text)
+@export(wasm, "tw_alloc", returns: address)
+effect fn tw_alloc(len: Float) -> Region = {
+  g_text = ffi.alloc(int.from_saturating(len))!
+  g_text
 }
 
 @export(wasm, "tw_weighted_length")
-fn tw_weighted_length() -> Float = float.from(tw.weighted_length(bytes.to_string_lossy(g_text)))
+effect fn tw_weighted_length() -> Float = float.from(tw.weighted_length(bytes.to_string_lossy(ffi.to_bytes(g_text)!)))
 
 @export(wasm, "tw_remaining")
-fn tw_remaining() -> Float = float.from(tw.remaining(bytes.to_string_lossy(g_text)))
+effect fn tw_remaining() -> Float = float.from(tw.remaining(bytes.to_string_lossy(ffi.to_bytes(g_text)!)))
 
 @export(wasm, "tw_is_valid")
-fn tw_is_valid() -> Float = if tw.is_valid(bytes.to_string_lossy(g_text)) then 1.0 else 0.0
+effect fn tw_is_valid() -> Float = if tw.is_valid(bytes.to_string_lossy(ffi.to_bytes(g_text)!)) then 1.0 else 0.0
 
 effect fn main() -> Unit = {
-  let _a = tw_alloc(1.0)
-  let _b = tw_weighted_length()
-  let _c = tw_remaining()
-  let _d = tw_is_valid()
+  let _a = tw_alloc(1.0)!
+  let _b = tw_weighted_length()!
+  let _c = tw_remaining()!
+  let _d = tw_is_valid()!
   ()
 }
