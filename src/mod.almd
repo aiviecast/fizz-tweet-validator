@@ -32,14 +32,14 @@ fn char_weight(cp: Int) -> Int =
   or (cp >= 0xFFE0 and cp <= 0xFFE6)     // Fullwidth signs
   then 2 else 1
 
-local fn cp_of(c: String) -> Int = string.codepoint(c) ?? 0
+local fn cp_of(c: String) -> Int = string.to_codepoint(c) ?? 0
 
 // 重み付き文字数(X の表示カウント)。
 fn weighted_length(text: String) -> Int =
-  list.fold(string.chars(text), 0, (acc, c) => acc + char_weight(cp_of(c)))
+  list.fold(string.to_list(text), 0, (acc, c) => acc + char_weight(cp_of(c)))
 
 // 単純な codepoint 数(参考。openaituber の現状 .length 相当)。
-fn codepoint_length(text: String) -> Int = list.len(string.chars(text))
+fn codepoint_length(text: String) -> Int = list.len(string.to_list(text))
 
 // 上限(280)。
 fn max_weight() -> Int = MAX_WEIGHT
